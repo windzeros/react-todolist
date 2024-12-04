@@ -1,10 +1,12 @@
 'use client';
 
+import { useSession } from "next-auth/react";
 import { TodoForm } from '@/components/todo/todo-form';
 import { TodoItem } from '@/components/todo/todo-item';
 import { TodoFilters } from '@/components/todo/todo-filters';
 import { CategoryManager } from '@/components/category/category-manager';
 import { Button } from '@/components/ui/button';
+import { LoginButton } from '@/components/auth/login-button';
 import {
   Sheet,
   SheetContent,
@@ -17,12 +19,31 @@ import { PeriodView } from '@/components/dashboard/period-view';
 import { useState } from 'react';
 
 export default function Home() {
+  const { data: session, status } = useSession();
   const filteredTodos = useTodoStore((state) => state.filteredTodos);
   const [showPeriodView, setShowPeriodView] = useState(false);
 
   const showTodoList = () => {
     setShowPeriodView(false);
   };
+
+  if (status === "loading") {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="text-lg">Loading...</div>
+      </div>
+    );
+  }
+
+  if (!session) {
+    return (
+      <div className="flex h-screen flex-col items-center justify-center gap-4">
+        <h1 className="text-2xl font-bold">Todo List</h1>
+        <p className="text-gray-600 mb-4">구글 캘린더와 연동되는 투두리스트</p>
+        <LoginButton />
+      </div>
+    );
+  }
 
   return (
     <main className="container mx-auto p-4 space-y-8">
